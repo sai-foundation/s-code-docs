@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model endpoints · S-Code Docs</title><meta name="description" content="Connect the execution service to an independently managed OpenAI-compatible model API.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/model-endpoints/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/" aria-current="page">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Build with S-Code</div><h1>Model endpoints</h1><p class="lead">Connect the execution service to an independently managed OpenAI-compatible model API.</p>
+<article class="doc-content"><h2 id="topologies">Topologies</h2><pre><code class="language-text">Direct provider ← credential handle resolved by daemon ← CLI · Local Web
+
+Provider ← credential held by local proxy ← daemon without provider key ← CLI · Local Web
+</code></pre>
+<p>Direct-provider setup is simpler, but the daemon process can access the
+credential value. An independent loopback proxy creates a narrower boundary:
+the proxy owns the provider key and the daemon uses a stable local endpoint
+without that key.</p>
+<h2 id="first-use-setup">First-use setup</h2><p>Use the interactive assistant:</p>
+<pre><code class="language-sh">s-code setup
+s-code doctor
+</code></pre>
+<p><code>doctor</code> sends the configured credential with a bounded <code>models</code> readiness
+request and verifies that the endpoint catalog is reachable. Some providers
+publish that catalog without authenticating the request, so this check confirms
+credential-handle presence but does not claim that the provider accepted the
+credential. The first real task is the end-to-end authentication check. The
+readiness request does not generate model tokens.</p>
+<p>Presets are available for OpenRouter, OpenAI, Anthropic, Gemini and a local
+OpenAI-compatible endpoint. Custom endpoints can be configured without a
+prompt:</p>
+<pre><code class="language-sh">export MODEL_API_KEY='your-key'
+s-code setup \
+  --provider openai-compatible \
+  --base-url https://models.example/v1 \
+  --credential-handle MODEL_API_KEY \
+  --model provider/model \
+  --yes
+</code></pre>
+<p>Remote endpoints must use HTTPS; plain HTTP is accepted only for loopback.
+Configuration stores <code>MODEL_API_KEY</code> as a handle, not the value. If a running
+service predates a configuration change, restart it so the new endpoint and
+environment are loaded.</p>
+<h2 id="development-server">Development server</h2><p>The S-Code repository includes a development API Server that exposes an
+OpenAI-compatible <code>/v1</code> API on loopback. It is not installed as part of the
+S-Code application.</p>
+<pre><code class="language-sh">cargo build --locked --release -p s-code-api-server
+OPENROUTER_API_KEY='your-key' \
+  target/release/s-code-api-server
+</code></pre>
+<p>The default development endpoint is <code>http://127.0.0.1:18787/v1</code>.</p>
+<h2 id="credential-boundary">Credential boundary</h2><p>Provider keys must not enter browser JavaScript, browser storage, URLs,
+checked-in configuration, product logs or benchmark artifacts. In direct mode
+the local service resolves the configured environment handle when calling the
+model; it never exposes the value to either client. In proxy mode the daemon
+does not receive the provider key.</p>
+<p>Model inference is an external data boundary, not an offline operation. A turn
+can send the user prompt, selected code and editor context, relevant transcript
+history, selected attachments, tool schemas, and tool or command results to the
+configured provider. Provider retention and training behavior are controlled
+by that provider's contract and account settings, not by S-Code.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/configuration/"><small>Previous</small>Configuration</a><a href="/s-code/docs/tools-permissions/"><small>Next</small>Tools &amp; permissions</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#topologies">Topologies</a><a href="#first-use-setup">First-use setup</a><a href="#development-server">Development server</a><a href="#credential-boundary">Credential boundary</a></nav></aside></div></body></html>

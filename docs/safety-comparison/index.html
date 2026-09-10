@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safety comparison and evidence · S-Code Docs</title><meta name="description" content="Compare secret-file protections in local coding agents, with primary sources and reproducible S-Code tests.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/safety-comparison/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/" aria-current="page">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Verify</div><h1>Safety comparison and evidence</h1><p class="lead">Compare secret-file protections in local coding agents, with primary sources and reproducible S-Code tests.</p>
+<article class="doc-content"><p>S-Code ships sensitive-path rules for its built-in file tools and sandboxed
+commands. The concrete benefit is that a task cannot switch from a file read
+to <code>cat .env.production</code> to obtain that file's contents through those tools.</p>
+<h2 id="what-is-being-compared">What is being compared</h2><p>Other Agent A, B and C are consistent labels across the safety and efficiency
+comparisons. Primary-source links remain available for verification.</p>
+<p>Reviewed <strong>9 September 2026</strong>. This is a comparison of documented local CLI
+controls on macOS/Linux, including the configuration needed to protect
+credential files. It is not a vulnerability ranking or a head-to-head attack
+benchmark. Cloud environments, administrator policies, containers and custom
+permission rules can materially change the comparison.</p>
+<div class="doc-table-wrap"><table>
+<thead>
+<tr>
+<th>Protection</th>
+<th>S-Code</th>
+<th>Other Agent A</th>
+<th>Other Agent B</th>
+<th>Other Agent C</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OS isolation for commands</td>
+<td>Built into the supported command runtime</td>
+<td>Use an external container or VM [5]</td>
+<td>Built into local sandbox modes [1]</td>
+<td>Built-in Bash sandbox, enabled through configuration or <code>/sandbox</code> [3]</td>
+</tr>
+<tr>
+<td>Sensitive files through command execution</td>
+<td>Built-in known-sensitive-path denies, including <code>.env.production</code></td>
+<td>Read-tool <code>.env</code> denies are separate from Bash permissions; no built-in OS sandbox [4, 5]</td>
+<td>Configure filesystem <code>deny</code> entries [2]</td>
+<td>Configure sandbox credential/file read rules; no built-in credential deny list [3]</td>
+</tr>
+<tr>
+<td>File reads</td>
+<td>Known-sensitive-path rules also apply to reads and edits</td>
+<td><code>.env</code> and <code>.env.*</code> denied by default in the read tool; example files allowed [4]</td>
+<td>File-specific sandbox rules can deny reads [2]</td>
+<td>File-tool permission rules are separately configurable [6]</td>
+</tr>
+</tbody></table></div>
+<p>Other Agent B already provides OS isolation. Other Agent C supports OS-enforced file
+restrictions and configurable credential masking. Other Agent A already protects
+<code>.env</code> in its read tool. S-Code's narrower advantage in this comparison is
+shipping sensitive-path denies across its built-in file and command tools,
+without asking users to write a project deny list first.</p>
+<h3 id="primary-sources">Primary sources</h3><ol>
+<li><a href="https://learn.chatgpt.com/docs/agent-approvals-security">Other Agent B: agent approvals and security</a>. Local sandboxing and defaults; users can deliberately grant broader access.</li>
+<li><a href="https://learn.chatgpt.com/docs/permissions#filesystem-permissions">Other Agent B: filesystem permission profiles</a>. Explicit path/glob deny rules, inheritance, and platform caveats. Permission profiles are documented as beta; older sandbox configuration takes precedence when present.</li>
+<li><a href="https://code.claude.com/docs/en/sandboxing#protect-credentials">Other Agent C: sandbox configuration and credential protection</a>. Credential deny/mask settings apply to configured sandboxed commands; the document states that there is no built-in credential deny list. It also describes enabling the sandbox and configuring stricter fallback behavior.</li>
+<li><a href="https://opencode.ai/docs/permissions/#defaults">Other Agent A: permission defaults</a>. The <code>read</code> deny rules cover environment files; most permissions otherwise start as allow.</li>
+<li><a href="https://github.com/anomalyco/opencode/blob/b6914b39db86e196ebcc95e92a0188cdf58ef67a/SECURITY.md#no-sandbox">Other Agent A: security model</a>, pinned to the source revision reviewed. Its permission system is not OS isolation; the project recommends a container or VM for that boundary.</li>
+<li><a href="https://code.claude.com/docs/en/permissions">Other Agent C: permission rules</a>. Tool permissions and OS sandbox restrictions are separate layers.</li>
+</ol>
+<h2 id="what-we-actually-ran">What we actually ran</h2><p>S-Code runtime revision: <code>4b33aa4c3d129aad63561e8a3a99cf8f41af0e15</code>.
+Local platform: macOS arm64. The runs below passed on 9 September 2026.
+Competitor behavior was checked against official documentation and source,
+not a live attack run. No comparative pass rate is claimed for any competitor.</p>
+<div class="doc-table-wrap"><table>
+<thead>
+<tr>
+<th>S-Code behavior check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ten existing privacy/security scenarios</td>
+<td>10/10 passed</td>
+</tr>
+<tr>
+<td>Command reads of <code>.env.production</code>, nested <code>.env</code> and credential-bearing Git config; rename/link attempts</td>
+<td>Passed</td>
+</tr>
+</tbody></table></div>
+<p>Run the same checks from a source checkout:</p>
+<pre><code class="language-sh">tests/test-privacy-security-use-cases.sh
+cargo test --locked -p s-code-tool-runtime \
+  tests::commands_cannot_read_sensitive_workspace_files -- --exact --nocapture
+</code></pre>
+<p>The <a href="https://github.com/sl-7qx/s-code/blob/main/tests/cases/privacy-security-use-cases.jsonl">scenario manifest</a>
+maps every scenario to its platform-specific behavior test. It includes
+ordinary workspace writes succeeding while external writes fail, sensitive
+file and symlink denial, browser session controls, private storage and timeout
+cleanup. The additional <a href="https://github.com/sl-7qx/s-code/blob/main/crates/tool-runtime/src/lib.rs">command-read test</a>
+uses synthetic secrets and verifies that file contents are not returned.
+These exercise real tool/runtime enforcement, without a model call.</p>
+<p>The runner selects Seatbelt tests on macOS and Bubblewrap tests on Linux.
+This local run establishes the macOS result; it does not substitute for a
+Linux run or an independent security audit.</p>
+<h2 id="boundaries-of-this-claim">Boundaries of this claim</h2><p>Sensitive-path protection recognizes known names and patterns. It cannot
+identify every secret stored under an arbitrary filename, and <code>.env.example</code>
+files intentionally remain usable. OS command writes are limited to the
+authorized workspace plus explicit scratch roots.</p>
+<p>Approved local MCP servers, hooks and background terminals run as trusted
+host code outside this command sandbox. Git has a separate hardened execution
+path. External model providers still receive the context supplied to them.
+Local encryption does not protect against compromise of the same OS account.
+See the <a href="/s-code/docs/security">security model</a> for the complete boundary.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/verification/"><small>Previous</small>Verification</a><a href="/s-code/docs/efficiency-comparison/"><small>Next</small>Efficiency comparison</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#what-is-being-compared">What is being compared</a><a href="#what-we-actually-ran">What we actually ran</a><a href="#boundaries-of-this-claim">Boundaries of this claim</a></nav></aside></div></body></html>

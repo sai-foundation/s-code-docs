@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools and permissions · S-Code Docs</title><meta name="description" content="Understand guarded edits, command sandboxes, permission modes and approvals.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/tools-permissions/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/" aria-current="page">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Build with S-Code</div><h1>Tools and permissions</h1><p class="lead">Understand guarded edits, command sandboxes, permission modes and approvals.</p>
+<article class="doc-content"><h2 id="core-tools">Core tools</h2><p>The default coding profile sends a compact set of core tools for planning,
+workspace discovery, file reading, editing, commands and Git inspection.
+Specialized built-in and MCP schemas load through tool search only when needed.</p>
+<p>The OS sandbox applies to the built-in command tool. Local MCP stdio servers,
+Hooks and background terminals are explicitly installed or started host
+processes: they inherit the signed-in operating-system account's filesystem and
+network authority. Their permission preview states this ambient authority and
+must be confirmed. Configuration persists credential handles rather than
+values, but the trusted executable receives each resolved value and could read,
+transmit or print it. Captured output is redacted before product persistence;
+install these processes with the same care as any local program.</p>
+<p>Git tools also use a host process rather than the command sandbox. S-Code
+resolves Git from an absolute <code>PATH</code> entry, ignores system and user Git
+configuration, disables hooks, fsmonitor, recursive submodules, signing and
+automatic maintenance, uses <code>--no-ext-diff --no-textconv</code>, and rejects local
+configuration that could start filters, text converters, fsmonitor, includes
+or submodule update commands. The check runs immediately before every Git
+operation. This blocks Git-configuration command execution; it is not a claim
+that the Git process itself runs inside an OS sandbox. Automatic push is not
+exposed to the Agent in the Preview.</p>
+<h2 id="file-edits">File edits</h2><p><code>read_file</code> returns file content and a SHA-256 digest. File tools traverse from
+a stable workspace directory handle and reject symlink-swapped components. For
+an existing file, <code>apply_patch</code> requires that digest and can apply uniquely
+matching <code>old_text</code>/<code>new_text</code> blocks. The digest is an optimistic concurrency
+check, not a cross-process transaction lock: a very small check-to-rename race
+remains, so stop concurrent generators and inspect the final diff.</p>
+<h2 id="command-profiles">Command profiles</h2><div class="doc-table-wrap"><table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Use</th>
+<th>Boundary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>read-only</code></td>
+<td>Inspection and non-mutating checks</td>
+<td>No workspace writes</td>
+</tr>
+<tr>
+<td><code>workspace-write</code></td>
+<td>Builds, tests and local generators</td>
+<td>Approved workspace writes; network off by default</td>
+</tr>
+<tr>
+<td><code>browser-test</code></td>
+<td>Local Playwright or Chromium suites</td>
+<td>Browser IPC compatibility with workspace and network restrictions reapplied</td>
+</tr>
+</tbody></table></div>
+<h2 id="permission-modes">Permission modes</h2><p>Manual mode requests approval. Accept-edits can approve policy-allowed file
+changes. Workspace mode can approve local, sandboxed, no-network commands and
+workspace writes, while network access and writes outside the workspace remain
+governed.</p>
+<p>Preview approvals authorize one operation only. The approval card freezes the
+server-projected command or external target, sandbox profile, filesystem scope
+and network setting before the operation runs; there is no session-wide approval
+shortcut. The explicit <code>s-code sandbox</code> command shows the same effective
+profile and network request interactively, or requires <code>--yes</code> in automation.</p>
+<h2 id="dependency-caches">Dependency caches</h2><p>Rust, Go and npm commands reuse private dependency-content caches beneath
+<code>$XDG_CACHE_HOME/s-code/tool-dependencies</code> or
+<code>~/.cache/s-code/tool-dependencies</code>. Set <code>S_CODE_TOOL_CACHE_DIR</code> to an
+absolute base directory outside the workspace to relocate them. Each canonical
+workspace receives a separate private namespace, so one repository cannot read
+or poison another repository's cache. The first fetch still requires approved
+network access; later commands in that same workspace can reuse downloaded
+content offline.</p>
+<p>Credential-bearing configuration remains command-local: Cargo uses an isolated
+<code>CARGO_HOME</code>, npm ignores the host <code>.npmrc</code>, Go uses an isolated <code>GOPATH</code>, and
+the sandbox mounts only the specific content-cache directories as writable.
+Version-scoped runtime roots installed by NVM, pyenv, Conda, asdf, mise and
+Volta are mounted read-only so their standard libraries and package-manager
+files continue to work without exposing the rest of the home directory.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/model-endpoints/"><small>Previous</small>Model endpoints</a><a href="/s-code/docs/architecture/"><small>Next</small>Architecture</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#core-tools">Core tools</a><a href="#file-edits">File edits</a><a href="#command-profiles">Command profiles</a><a href="#permission-modes">Permission modes</a><a href="#dependency-caches">Dependency caches</a></nav></aside></div></body></html>

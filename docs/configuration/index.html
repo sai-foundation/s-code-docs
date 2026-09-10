@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration · S-Code Docs</title><meta name="description" content="Configure the local service without placing credentials in browser or checked-in state.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/configuration/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/" aria-current="page">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Build with S-Code</div><h1>Configuration</h1><p class="lead">Configure the local service without placing credentials in browser or checked-in state.</p>
+<article class="doc-content"><h2 id="configuration-file">Configuration file</h2><p>The default application runs locally with SQLite and a loopback listener. Start
+with <a href="https://github.com/sl-7qx/s-code/blob/main/config/s-code.example.toml"><code>config/s-code.example.toml</code></a>.</p>
+<p>For an installed application, the normal first-use path is:</p>
+<pre><code class="language-sh">s-code setup
+s-code doctor
+</code></pre>
+<p>This creates a private <code>~/.s-code/config.toml</code> and changes only model
+settings when updating an existing valid file.</p>
+<p>Validate or print the redacted effective daemon configuration:</p>
+<pre><code class="language-sh">cargo run --locked -p s-code-config -- \
+  validate --component daemon --config config/s-code.example.toml
+cargo run --locked -p s-code-config -- \
+  print-effective --component daemon --config config/s-code.example.toml
+</code></pre>
+<h2 id="precedence">Precedence</h2><p>Configuration precedence is defaults, an explicit configuration file, allowed
+development environment variables and explicit command overrides. Production
+profiles reject ordinary environment and command overrides. Secret values must
+come from explicitly named <code>secret_references</code>; effective configuration output
+redacts them.</p>
+<h2 id="secrets">Secrets</h2><p>The browser is not a configuration or secret store. In direct-provider mode,
+the local daemon resolves the configured environment handle and can access that
+credential value. In independent-proxy mode, the proxy process owns the
+provider credential and the daemon connects without it. Use an external secret
+manager where appropriate in either topology.</p>
+<h2 id="local-state">Local state</h2><p>The default database is <code>~/.s-code/state/s-code.db</code>, not the current
+working directory. A fresh file automatically receives a private managed key
+at <code>~/.s-code/state/.s-code.db.storage-key</code>; sensitive fields are
+stored as AES-256-GCM envelopes. Existing non-empty plaintext databases are
+detected and never silently rewritten. <code>s-code doctor</code> reports their
+legacy status and fails before they are treated as suitable for sensitive
+work.</p>
+<p>Managed encryption limits disclosure when a database file is copied alone; it
+does not protect against an attacker who already controls the same operating-
+system account and can read the complete state directory. Use full-disk
+encryption and normal account security for that threat.</p>
+<h2 id="mcp">MCP</h2><p>MCP is disabled by default. When enabled, use absolute executable paths,
+bounded arguments and environment-variable handles rather than secret values.
+Every MCP tool still enters the ordinary policy, approval and audit path.</p>
+<p>The Preview loads actor-scoped MCP runtimes only in the local
+<code>development_token</code> authentication mode. In <code>team_grant</code> mode the daemon fails
+closed: MCP runtime capabilities are unavailable and stored, configured,
+Plugin-provided and OAuth-backed MCP servers are not connected. Deploy separate
+local daemons for actors who need MCP until the shared runtime can route every
+registry and authorization provider by full Organization, Team and Actor scope.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/core-concepts/"><small>Previous</small>Core concepts</a><a href="/s-code/docs/model-endpoints/"><small>Next</small>Model endpoints</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#configuration-file">Configuration file</a><a href="#precedence">Precedence</a><a href="#secrets">Secrets</a><a href="#local-state">Local state</a><a href="#mcp">MCP</a></nav></aside></div></body></html>

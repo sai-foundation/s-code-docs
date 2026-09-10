@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Security model · S-Code Docs</title><meta name="description" content="Review the local trust boundary, browser credential handling and fail-closed execution rules.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/security/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/" aria-current="page">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Operate</div><h1>Security model</h1><p class="lead">Review the local trust boundary, browser credential handling and fail-closed execution rules.</p>
+<article class="doc-content"><h2 id="trust-boundary">Trust boundary</h2><p>The default service is local and loopback-bound. In direct-provider mode the
+daemon resolves a named environment handle and therefore can access the
+provider credential value. In independent-proxy mode the proxy owns that value
+and the daemon has no provider key. Workspace tools are constrained to the
+authorized root, sensitive paths are denied and policy decisions are made
+before execution.</p>
+<h2 id="browser-session">Browser session</h2><p>Local Web never receives the provider key or daemon bearer token. An
+unauthenticated request to the loopback homepage cannot mint a browser session.
+The <code>s-code web</code> launcher reads the private connection file and
+authenticates to mint a one-time bootstrap; another authenticated local client
+may do the same. Only that short-lived value is passed in a URL
+fragment. The page removes the fragment before its first network request and
+exchanges the bootstrap for an HttpOnly, SameSite=Strict cookie. Provider and
+daemon credentials stay out of browser JavaScript, storage and URLs.</p>
+<h2 id="external-data-boundaries">External data boundaries</h2><p>The selected model provider can receive prompts, selected code/editor context,
+relevant transcript history, selected attachments, tool schemas and tool or
+command results. Optional remote MCP servers and configured connectors receive
+the arguments or content required for their explicitly configured actions.
+Their retention is governed by those external services. Local-first means the
+execution, policy, approvals and persistence are local; it does not mean every
+model or integration payload stays on the machine.</p>
+<h2 id="execution-boundaries">Execution boundaries</h2><ul>
+<li>Commands use structured executable and argument fields rather than an
+implicit shell.</li>
+<li>Network access is disabled unless it is explicitly required and approved.</li>
+<li>Workspace-write and browser-test profiles retain explicit write roots.</li>
+<li>Timeouts terminate the command process group and wait for the direct child
+and output drains. A deliberately
+detached host process can escape that group, so untrusted work should also
+use an outer container or VM when complete machine isolation is required.</li>
+<li>External tool calls enter local policy and approval. Installing a local MCP
+server or Hook, or starting a background terminal, separately grants that
+host executable the signed-in account's ambient filesystem and network
+authority; the permission preview discloses this boundary. Approval is bound
+to the command specification plus the executable, direct shebang interpreter
+and absolute file-argument identities and is revalidated before reuse.
+Transitive files loaded by trusted host code are not frozen by this mechanism.</li>
+<li>Git runs as a hardened host process outside the command sandbox. System and
+user Git configuration is ignored, executable local configuration is rejected
+before every operation, and hooks, fsmonitor, external diff/text conversion,
+recursive submodules, signing and automatic maintenance are disabled. The
+authorized workspace must be the repository root, so Git cannot inspect a
+parent repository outside a selected subdirectory. The Preview does not
+expose automatic push to the Agent.</li>
+<li>Actor-scoped MCP runtime loading is available only in local development-token
+mode. Team Grant mode advertises MCP runtime capabilities as unavailable and
+does not load stdio, HTTP, Plugin-provided or OAuth-backed MCP registries. This
+fail-closed Preview boundary prevents one actor from reaching another actor's
+MCP resources or credential provider while per-actor runtime routing is built.</li>
+<li>A timed-out, malformed or cancelled local stdio MCP request kills its entire
+process group, waits for the direct process asynchronously when cancellation
+interrupts the request, permanently invalidates the connection and never
+consumes a later response. Remote HTTP MCP cancellation cannot revoke work
+that the remote service already accepted; treat that as an external-service
+residual risk.</li>
+</ul>
+<h2 id="local-state">Local state</h2><p>Fresh installations keep the SQLite database outside the repository under
+<code>~/.s-code/state</code>. Sensitive transcript, attachment, installed-extension
+and local audit payloads are protected with AES-256-GCM and a generated 32-byte
+managed key; the directory, database and key use private permissions and reject
+unsafe symlink targets. Operational IDs, timestamps, statuses and indexes
+remain plaintext so the daemon can schedule and filter work. Team planning
+fields also remain plaintext: goal/task titles, outcome and PR URLs, evidence
+and blockers, ownership URIs and on-call labels, knowledge titles/source URIs,
+model labels and budgets. The database and key are separate files, so a
+database copied alone does not disclose encrypted content, but it can disclose
+those operational and planning fields.</p>
+<p>This is a local-at-rest boundary, not a claim to resist compromise of the
+signed-in operating-system account. A process able to read the entire state
+directory can obtain both files. Use full-disk encryption, protected backups
+and a secure user account as the outer boundary.</p>
+<h2 id="audit">Audit</h2><p>Tool requests, policy decisions, approvals, execution outcomes and usage are
+projected as typed session events. Sensitive content is bounded and protected
+separately from metadata needed for review and replay.</p>
+<p>The Preview event cursor is a daemon-global monotonic sequence. Actor-filtered
+streams never return another actor's event content or identity, but gaps can
+reveal that other local activity occurred and approximately when. Deploy a
+separate daemon per trust boundary when that metadata matters; opaque
+principal-scoped cursors are planned beyond the Preview.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/architecture/"><small>Previous</small>Architecture</a><a href="/s-code/docs/privacy-security-comparison/"><small>Next</small>Privacy and security</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#trust-boundary">Trust boundary</a><a href="#browser-session">Browser session</a><a href="#external-data-boundaries">External data boundaries</a><a href="#execution-boundaries">Execution boundaries</a><a href="#local-state">Local state</a><a href="#audit">Audit</a></nav></aside></div></body></html>

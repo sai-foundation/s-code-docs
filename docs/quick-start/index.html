@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick start · S-Code Docs</title><meta name="description" content="Install from source and start your first CLI or Local Web session.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/quick-start/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/" aria-current="page">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Start here</div><h1>Quick start</h1><p class="lead">Install from source and start your first CLI or Local Web session.</p>
+<article class="doc-content"><h2 id="prerequisites">Prerequisites</h2><p>Use macOS or Linux. The installer checks prerequisites and asks before
+installing anything missing. You do not need to prepare Rust or Node yourself.</p>
+<div class="doc-table-wrap"><table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Purpose</th>
+<th>How the installer prepares it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Rust 1.89</td>
+<td>Build the CLI and local service</td>
+<td>Reuse the pinned toolchain or install it with official rustup</td>
+</tr>
+<tr>
+<td>Node.js 22.12+ (22.x) and npm</td>
+<td>Build Local Web</td>
+<td>Reuse a compatible installation or download Node 22.23.2 with a pinned SHA-256 checksum</td>
+</tr>
+<tr>
+<td>Python 3.9+</td>
+<td>Installation locking and atomic replacement</td>
+<td>System package manager; existing Homebrew on macOS</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>Clone the source and operate on repositories</td>
+<td>System package manager or Apple Command Line Tools</td>
+</tr>
+<tr>
+<td>C/C++ compiler and make</td>
+<td>Compile native dependencies</td>
+<td>System build packages or Apple Command Line Tools</td>
+</tr>
+<tr>
+<td>Bubblewrap (Linux)</td>
+<td>Isolate agent commands at runtime</td>
+<td>Distribution package manager</td>
+</tr>
+</tbody></table></div>
+<p>Automatic Linux system-package installation supports <code>apt-get</code>, <code>dnf</code> and
+<code>pacman</code>; other distributions must prepare the listed system packages manually.
+Automatic Node downloads support macOS and glibc-based Linux on x86_64 and
+arm64. Other architectures can use an existing compatible Node installation.
+The installer does not change Linux kernel or sandbox settings. Bubblewrap
+must be permitted by your system's user-namespace policy.</p>
+<p>On macOS, the script opens Apple's Command Line Tools installer when needed.
+Complete that system dialog and rerun the script. If Python 3.9+ is still
+missing, the script can use an existing Homebrew installation; otherwise
+install Python from <a href="https://www.python.org/downloads/macos/">python.org</a>.
+The script does not install Homebrew itself.</p>
+<p>New managed Rust/Node build tools live in <code>~/.cache/s-code/build-tools</code>; the
+installer does not put these build tools on your shell path or replace your
+existing Node. It adds only S-Code's installation directory to shell
+configuration; use <code>--no-modify-path</code> to opt out.
+An existing rustup installation receives the pinned toolchain without changing
+its default. Managed tools are for building S-Code; configure the languages
+and tools needed by your own projects separately. Rust, Node, Python and the
+compiler are not needed merely to launch an already-built S-Code.</p>
+<pre><code class="language-sh">scripts/install-from-source.sh --check-deps       # Check only; no downloads/build
+scripts/install-from-source.sh --yes              # Approve missing dependencies
+scripts/install-from-source.sh --no-install-deps  # Build with existing tools only
+scripts/install-from-source.sh --no-modify-path   # Leave shell configuration alone
+</code></pre>
+<p>Non-interactive installs fail with a dependency list unless <code>--yes</code> is supplied.
+System package installation can still require an administrator password.</p>
+<h2 id="source-installation">Source installation</h2><p>Clone a reviewed S-Code revision and install from a clean checkout:</p>
+<pre><code class="language-sh">git clone https://github.com/sl-7qx/s-code.git
+cd s-code
+scripts/install-from-source.sh
+</code></pre>
+<p>If Git is not installed yet, download and extract the repository's source ZIP
+instead, then run <code>scripts/install-from-source.sh</code> inside the extracted source.
+The installer can then prepare Git along with other system dependencies.</p>
+<p>Set <code>S_CODE_INSTALL_DIR</code> to choose a dedicated binary directory. The script
+builds Local Web and the locked Rust workspace, stages the application files,
+runs internal self-tests and atomically replaces the installed commands.</p>
+<p>The default destination is <code>~/.local/bin</code>. After installation, <code>./s-code</code> in
+the checkout launches the installed application immediately, even if your
+current terminal has not loaded the new command path. With a custom destination,
+keep <code>S_CODE_INSTALL_DIR</code> exported when using this checkout launcher.</p>
+<p>The installer configures zsh (<code>.zshrc</code>, respecting <code>ZDOTDIR</code>), bash (<code>.bashrc</code>
+and the existing login profile, or <code>.bash_profile</code>), and fish
+(<code>conf.d/s-code-path.fish</code>, respecting <code>XDG_CONFIG_HOME</code>). Existing settings are
+preserved and repeat installs do not duplicate the configuration. New terminals
+can run <code>s-code</code> from any project. For the current terminal, use the activation
+command printed by the installer, or keep using <code>./s-code</code> from the checkout.
+Unknown shells and configuration write failures receive an absolute launch
+command. <code>--no-modify-path</code> can be combined with a dependency option above.</p>
+<h2 id="configure-a-model">Configure a model</h2><p>Run the first-use assistant after installation:</p>
+<pre><code class="language-sh">./s-code setup
+./s-code doctor
+</code></pre>
+<p>The assistant writes a private <code>~/.s-code/config.toml</code>, containing the
+provider, model, endpoint and credential environment-variable name. It never
+writes the credential value. Non-interactive automation can use, for example:</p>
+<pre><code class="language-sh">export OPENROUTER_API_KEY='your-key'
+s-code setup --provider openrouter --model z-ai/glm-5.3 --yes
+</code></pre>
+<h2 id="start-a-client">Start a client</h2><p>Start either client:</p>
+<pre><code class="language-sh">s-code
+s-code web
+</code></pre>
+<p>The first client starts one shared loopback daemon in the background and
+discovers its private local connection automatically. <code>s-code web</code> opens
+the stable loopback application. The launcher authenticates with the private
+connection file, or another authenticated local client, to mint a single-use
+bootstrap; the page removes its fragment
+immediately and exchanges it for a private browser cookie. Opening the bare
+loopback URL cannot create an authorized browser session. In a headless
+environment, set <code>S_CODE_NO_BROWSER=1</code> to print a single-use launch URL;
+do not share or log it. Closing the browser does not stop the daemon.
+Use <code>s-code stop</code> and <code>s-code restart</code> for lifecycle control. Logs are
+written below the configured state directory at <code>logs/daemon.log</code> and rotate at
+5 MiB with two backups. <code>S_CODE_URL</code> and <code>S_CODE_TOKEN</code> are advanced
+automation overrides, not normal setup.</p>
+<h2 id="state-and-backup">State and backup</h2><p>Fresh local sessions use SQLite under <code>~/.s-code/state</code>. Model and user
+message content, turn inputs and checkpoints, attachments, artifacts, extension
+and MCP configuration, audit payloads and retained background-terminal output
+are encrypted with a generated 32-byte managed key. IDs, timestamps, statuses
+and indexes remain plaintext. Team planning records also remain plaintext,
+including goal and task titles, criteria, evidence, blockers, outcome and
+pull-request URLs, ownership resource URIs and on-call labels, knowledge titles
+and source URIs, model labels and budgets. Do not put secrets in those
+operational fields. Both the state directory and key file use private
+permissions.
+Before relying on a candidate build, stop the daemon and exercise backup and
+integrity verification with a destination outside the repository. All offline
+database maintenance commands acquire the same instance lock as the daemon:</p>
+<pre><code class="language-sh">s-code stop
+s-code web --backup /secure/path/s-code-backup.sqlite
+s-code web --verify-database
+</code></pre>
+<p>For managed encryption, backup also creates a private sibling named
+<code>.s-code-backup.sqlite.storage-key</code>. Protect and move the database and key
+together. Restore discovers that sibling automatically. A database copied
+without its key remains unreadable, while possession of the full state
+directory is equivalent to local-user access and is outside this protection.</p>
+<p>Restore also requires the daemon to remain stopped:</p>
+<pre><code class="language-sh">s-code web --restore /secure/path/s-code-backup.sqlite
+</code></pre>
+<h2 id="update">Update</h2><p>S-Code releases publish reviewed Git tags and GitHub-generated source
+archives only. They do not publish precompiled executables, a binary installer
+or an automatic updater. To update an installation, switch the checkout to the
+desired reviewed revision or tag, then run:</p>
+<pre><code class="language-sh">s-code stop
+scripts/install-from-source.sh
+s-code
+</code></pre>
+<p>Stopping first prevents an older already-running daemon from being reused with
+the newly installed CLI. The installer deliberately never kills active work;
+if it was run while the service remained active, run <code>s-code restart</code>
+before continuing.</p>
+<h2 id="moving-from-opencoding-community">Moving from Opencoding Community</h2><p>The S-Code rename requires a fresh installation and profile. This includes
+Opencoding Community candidates labeled <code>v0.1.0-preview.1</code> and earlier private
+candidates. Encryption identifiers and historical database migrations changed;
+old databases and backups are not compatible with S-Code.</p>
+<p>Stop the old daemon using its original launcher and preserve the entire old
+<code>~/.opencoding</code> directory with private permissions. Keep the old binary if you
+need to read its local history. Install S-Code and run <code>s-code setup</code> to create
+a new <code>~/.s-code</code> profile. The rename does not move or delete old state.
+Do not copy old databases, backups, keys or configuration into the new profile,
+or point S-Code at the old state directory.</p>
+<p>Update automation to use <code>s-code</code> and <code>S_CODE_*</code> environment variables. Install
+the renamed IDE clients and connect them to the new daemon; saved connections,
+browser sessions, URI handlers and credentials use new namespaces. Old client
+and daemon versions must not be mixed. Future S-Code database migrations must
+be explicit and tested before a stable release.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/introduction/"><small>Previous</small>Introduction</a><a href="/s-code/docs/core-concepts/"><small>Next</small>Core concepts</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#prerequisites">Prerequisites</a><a href="#source-installation">Source installation</a><a href="#configure-a-model">Configure a model</a><a href="#start-a-client">Start a client</a><a href="#state-and-backup">State and backup</a><a href="#update">Update</a><a href="#moving-from-opencoding-community">Moving from Opencoding Community</a></nav></aside></div></body></html>

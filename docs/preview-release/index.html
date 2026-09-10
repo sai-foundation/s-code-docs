@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview release readiness · S-Code Docs</title><meta name="description" content="Understand the v0.1.0-preview.1 scope, evidence and final public launch gate.">
+<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/preview-release/"><link rel="stylesheet" href="/s-code/style.css">
+<script src="/s-code/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/" aria-current="page">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Operate</div><h1>Preview release readiness</h1><p class="lead">Understand the v0.1.0-preview.1 scope, evidence and final public launch gate.</p>
+<article class="doc-content"><h2 id="supported-preview-scope">Supported Preview scope</h2><p><code>v0.1.0-preview.1</code> is a source-only Developer Preview for macOS and Linux. It
+includes the CLI, Local Web, local sessions, guarded tools, approvals, audit,
+Git integration and local single-user MCP. The checked-in VS Code and JetBrains prototypes are
+experimental source fixtures, not supported Preview clients: they do not yet
+share the installed application's automatic local connection flow. Windows
+native tool execution, precompiled binaries, automatic updates and IDE
+marketplace distribution are outside this Preview.</p>
+<p>The Preview is intended for evaluation on non-production repositories. Back up
+important work and inspect the proposed diff before accepting an edit.</p>
+<h2 id="evidence-required-before-the-tag">Evidence required before the tag</h2><p>The exact candidate commit must pass:</p>
+<ul>
+<li>the complete S-Code source gate;</li>
+<li>macOS and Linux CLI end-to-end tests;</li>
+<li>clean-home setup, daemon autostart and first real task;</li>
+<li>ten executable privacy/security use cases;</li>
+<li>macOS and Windows Rust compilation and tests;</li>
+<li>Local Web and documentation-site checks;</li>
+<li>DCO and candidate-tree evidence binding.</li>
+<li>a high-confidence credential scan over the tracked tree and every blob
+reachable from the local Git refs (<code>python3 scripts/check-community-secrets.py --history</code>).</li>
+</ul>
+<p>Performance comparisons admit only reviewed, trusted workspaces accepted by the
+frozen outcome checks. Public samples, fixtures and derived-claim validation live under
+<code>tests/benchmarks/</code>.</p>
+<h2 id="final-publication-gate">Final publication gate</h2><p>The repository remains private and <code>publication_enabled</code> remains <code>false</code> until
+the code and evidence review is complete. After visibility changes to public,
+maintainers must configure branch protection before announcing the project:</p>
+<ol>
+<li>require a pull request, one approval, resolved conversations and a current
+branch;</li>
+<li>require the fixed <code>source-gate</code> check, which includes DCO and every selected
+test, including CodeQL when applicable;</li>
+<li>block force pushes and branch deletion;</li>
+<li>enable private vulnerability reporting and set the documentation homepage;</li>
+<li>merge the reviewed change that sets <code>publication_enabled</code> to <code>true</code>;</li>
+<li>manually run <strong>S-Code full verification</strong> on the exact reviewed <code>main</code>
+commit and require its complete public matrix and release-ready evidence;</li>
+<li>create the reviewed <code>v0.1.0-preview.1</code> tag from that qualified commit.</li>
+</ol>
+<p>The tag workflow reruns the complete gate, creates a draft GitHub release,
+attaches a deterministic source archive, SPDX SBOM, third-party license
+information, checksums, machine-readable release evidence and GitHub artifact
+attestations, then downloads and verifies the exact asset set and checksums.
+Only after those checks does it publish the draft (and mark Preview versions as
+prereleases), so users never see a partially uploaded release. The workflow
+does not create tags or change repository visibility.</p>
+<h2 id="known-limitations">Known limitations</h2><ul>
+<li>The Preview can prepare and commit an approved local diff, but it does not
+expose automatic Git push to the agent. Review the commit and push it with
+your normal Git client so remote credentials and destinations remain under
+direct user control.</li>
+<li>The default distribution builds from source. Its installer can prepare missing
+build prerequisites after confirmation; system packages may require an
+administrator and macOS developer tools may require a system dialog.</li>
+<li>Local managed encryption protects a copied database file, but not an attacker
+who controls the signed-in operating-system account and can read both the
+database and local key.</li>
+<li>Network access is disabled for normal tool commands unless separately
+requested and permitted. The model endpoint itself is an explicit external
+data boundary.</li>
+<li>Benchmark results describe the named tasks, versions and samples. They are
+not a universal ranking across repositories, models or providers.</li>
+<li>The Preview event cursor is globally monotonic. Filtered clients cannot read
+another actor's event, but sequence gaps can reveal that other local activity
+occurred; use separate daemons where even that metadata is sensitive.</li>
+<li>Team Grant mode does not load MCP runtimes or OAuth credential providers in
+the Preview. Local single-user mode retains MCP; shared per-actor runtime
+routing is required before MCP can be enabled for Team Grant deployments.</li>
+</ul>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/efficiency-comparison/"><small>Previous</small>Efficiency comparison</a><span></span></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#supported-preview-scope">Supported Preview scope</a><a href="#evidence-required-before-the-tag">Evidence required before the tag</a><a href="#final-publication-gate">Final publication gate</a><a href="#known-limitations">Known limitations</a></nav></aside></div></body></html>
