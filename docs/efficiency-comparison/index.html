@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Historical efficiency comparison · S-Code Docs</title><meta name="description" content="Historical same-model results for S-Code and Other Agent A, with every observation and explicit measurement scope.">
-<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/efficiency-comparison/"><link rel="stylesheet" href="/s-code/style.css">
-<script src="/s-code/site.js" defer></script></head><body>
+<link rel="canonical" href="https://sl-7qx.github.io/s-code-docs/docs/efficiency-comparison/"><link rel="stylesheet" href="/s-code-docs/style.css">
+<script src="/s-code-docs/site.js" defer></script></head><body>
 <a class="skip" href="#content">Skip to content</a>
-<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<header><a class="brand" href="/s-code-docs/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code-docs/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
 <div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
-<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/" aria-current="page">Efficiency comparison</a></section></nav></details></aside>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/" aria-current="page">Efficiency comparison</a></section></nav></details></aside>
 <main id="content"><div class="eyebrow">Verify</div><h1>Historical efficiency comparison</h1><p class="lead">Historical same-model results for S-Code and Other Agent A, with every observation and explicit measurement scope.</p>
 <article class="doc-content"><p>On <strong>31 August 2026</strong>, a S-Code development build and <strong>Other Agent A</strong> each
 completed three Durable Task Queue runs using <code>z-ai/glm-5.3</code>. Both passed all
 three frozen-grader checks. The medians were <strong>34.7% fewer reported tokens</strong>
 and <strong>6.6% less elapsed time</strong> for S-Code.</p>
 <p>Other Agent A is the same comparison label used in the
-<a href="/s-code/docs/safety-comparison">safety comparison</a>.</p>
+<a href="/s-code-docs/docs/safety-comparison">safety comparison</a>.</p>
 <h2 id="selected-repeated-cohort">Selected repeated cohort</h2><div class="doc-table-wrap"><table>
 <thead>
 <tr>
@@ -151,9 +151,9 @@ for metric in ('total_tokens', 'elapsed_seconds'):
     print(f'{metric}: {s_code} vs {other}; reduction {(1 - s_code / other) * 100:.1f}%')
 PY
 </code></pre>
-<p>For a new measurement, follow the <a href="/s-code/docs/verification#coding-harness-benchmarks">frozen-task benchmark method</a>.
+<p>For a new measurement, follow the <a href="/s-code-docs/docs/verification#coding-harness-benchmarks">frozen-task benchmark method</a>.
 Record the actual executing binary, source state, model route, usage semantics,
 raw events and grader results. A fresh run measures that build; it does not
 reproduce these historical numbers merely by using the same task name.</p>
-</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/safety-comparison/"><small>Previous</small>Safety comparison</a><a href="/s-code/docs/preview-release/"><small>Next</small>Preview release</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code-docs/docs/safety-comparison/"><small>Previous</small>Safety comparison</a><a href="/s-code-docs/docs/preview-release/"><small>Next</small>Preview release</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
 <aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#selected-repeated-cohort">Selected repeated cohort</a><a href="#conditions-and-provenance">Conditions and provenance</a><a href="#accounting-and-scope">Accounting and scope</a><a href="#other-task-retained-in-the-snapshot">Other task retained in the snapshot</a><a href="#recalculate-or-run-a-fresh-comparison">Recalculate or run a fresh comparison</a></nav></aside></div></body></html>

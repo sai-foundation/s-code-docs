@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy and security boundaries in S-Code · S-Code Docs</title><meta name="description" content="Understand credential protection, command isolation and guarded edits through concrete scenarios, source code and documented comparisons.">
-<link rel="canonical" href="https://sl-7qx.github.io/s-code/docs/privacy-security-comparison/"><link rel="stylesheet" href="/s-code/style.css">
-<script src="/s-code/site.js" defer></script></head><body>
+<link rel="canonical" href="https://sl-7qx.github.io/s-code-docs/docs/privacy-security-comparison/"><link rel="stylesheet" href="/s-code-docs/style.css">
+<script src="/s-code-docs/site.js" defer></script></head><body>
 <a class="skip" href="#content">Skip to content</a>
-<header><a class="brand" href="/s-code/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<header><a class="brand" href="/s-code-docs/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code-docs/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
 <div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
-<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code/docs/introduction/">Introduction</a><a href="/s-code/docs/quick-start/">Quick start</a><a href="/s-code/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code/docs/configuration/">Configuration</a><a href="/s-code/docs/model-endpoints/">Model endpoints</a><a href="/s-code/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code/docs/architecture/">Architecture</a><a href="/s-code/docs/security/">Security model</a><a href="/s-code/docs/verification/">Verification</a><a href="/s-code/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code/docs/privacy-security-comparison/" aria-current="page">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code/docs/safety-comparison/">Safety comparison</a><a href="/s-code/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/" aria-current="page">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
 <main id="content"><div class="eyebrow">Why S-Code</div><h1>Privacy and security boundaries in S-Code</h1><p class="lead">Understand credential protection, command isolation and guarded edits through concrete scenarios, source code and documented comparisons.</p>
 <article class="doc-content"><h2 id="what-s-code-protects">What S-Code protects</h2><p>S-Code separates <strong>model credentials, browser sessions, tool permissions,
 operating-system isolation, concurrent file edits and audit evidence</strong> into
@@ -23,7 +23,7 @@ shared events covering tools, approvals, usage and diffs.</p>
 <blockquote>
 <p><strong>Historical scope:</strong> S-Code source and public product documentation reviewed
 on 31 August 2026. An undocumented guarantee is not proof that another agent
-lacks a capability. See the <a href="/s-code/docs/safety-comparison">secret-file comparison</a>
+lacks a capability. See the <a href="/s-code-docs/docs/safety-comparison">secret-file comparison</a>
 for the narrower review updated on 9 September 2026.</p>
 </blockquote>
 <h2 id="five-concrete-scenarios">Five concrete scenarios</h2><h3 id="1-a-readme-injection-asks-the-agent-to-upload-an-ssh-key">1. A README injection asks the agent to upload an SSH key</h3><p>Malicious instructions might ask the agent to run <code>cat ~/.ssh/id_rsa</code> and
@@ -94,7 +94,7 @@ make unexpected actions easier to investigate; they do not eliminate risk.</p>
 known implicit execution paths fail closed, while broader OS isolation for
 Git, local MCP and extension hooks remains future work.</p>
 <h2 id="comparison-of-published-designs">Comparison of published designs</h2><p>This table retains the historical review date above. Agent labels are
-consistent with the <a href="/s-code/docs/safety-comparison">safety comparison</a>.</p>
+consistent with the <a href="/s-code-docs/docs/safety-comparison">safety comparison</a>.</p>
 <div class="doc-table-wrap"><table>
 <thead>
 <tr>
@@ -184,5 +184,5 @@ published controls, not a claim that other products are unsafe.</p>
 <p>These are documented designs and defaults at the stated review date. Recheck
 primary sources after product updates and validate implementation behavior
 with repeatable security tests. This table is not a permanent product ranking.</p>
-</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code/docs/security/"><small>Previous</small>Security model</a><a href="/s-code/docs/verification/"><small>Next</small>Verification</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code-docs/docs/security/"><small>Previous</small>Security model</a><a href="/s-code-docs/docs/verification/"><small>Next</small>Verification</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
 <aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#what-s-code-protects">What S-Code protects</a><a href="#five-concrete-scenarios">Five concrete scenarios</a><a href="#how-each-tool-is-constrained">How each tool is constrained</a><a href="#comparison-of-published-designs">Comparison of published designs</a><a href="#design-principles">Design principles</a><a href="#limitations">Limitations</a><a href="#sources-and-verification">Sources and verification</a></nav></aside></div></body></html>
