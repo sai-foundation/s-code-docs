@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Configuration · S-Code Docs</title><meta name="description" content="Configure the local service without placing credentials in browser or checked-in state.">
-<link rel="canonical" href="https://sl-7qx.github.io/s-code-docs/docs/configuration/"><link rel="stylesheet" href="/s-code-docs/style.css">
+<link rel="canonical" href="https://sai-foundation.github.io/s-code-docs/docs/configuration/"><link rel="stylesheet" href="/s-code-docs/style.css">
 <script src="/s-code-docs/site.js" defer></script></head><body>
 <a class="skip" href="#content">Skip to content</a>
 <header><a class="brand" href="/s-code-docs/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code-docs/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
 <div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
-<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/" aria-current="page">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/" aria-current="page">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a><a href="/s-code-docs/docs/code-mode/">Code Mode</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
 <main id="content"><div class="eyebrow">Build with S-Code</div><h1>Configuration</h1><p class="lead">Configure the local service without placing credentials in browser or checked-in state.</p>
 <article class="doc-content"><h2 id="configuration-file">Configuration file</h2><p>The default application runs locally with SQLite and a loopback listener. Start
-with <a href="https://github.com/sl-7qx/s-code/blob/main/config/s-code.example.toml"><code>config/s-code.example.toml</code></a>.</p>
+with <a href="https://github.com/sai-foundation/s-code/blob/main/config/s-code.example.toml"><code>config/s-code.example.toml</code></a>.</p>
 <p>For an installed application, the normal first-use path is:</p>
 <pre><code class="language-sh">s-code setup
 s-code doctor
@@ -22,6 +22,53 @@ settings when updating an existing valid file.</p>
 cargo run --locked -p s-code-config -- \
   print-effective --component daemon --config config/s-code.example.toml
 </code></pre>
+<h2 id="model-editing-formats">Model editing formats</h2><p>S-Code exposes one editing format and its matching system instructions to the
+selected model. All formats use the same permissions, revision checks and Turn
+undo records. Configure the format in your existing <code>[model]</code> table:</p>
+<pre><code class="language-toml">[model]
+editing_mode = "auto"
+
+[model.editing_overrides]
+"my-fast-endpoint" = "text"
+"my-local-model" = "lines"
+</code></pre>
+<p>Supported values are <code>auto</code>, <code>lines</code>, <code>text</code> and <code>patch</code>.</p>
+<div class="doc-table-wrap"><table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Model sends</th>
+<th>Automatic selection</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lines</code></td>
+<td>Numbered line ranges and replacement text</td>
+<td>Unknown model families</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>Exact old and new text blocks</td>
+<td>Names starting with <code>claude-</code></td>
+</tr>
+<tr>
+<td><code>patch</code></td>
+<td>Add/Update patch text and a revision map</td>
+<td>Names starting with <code>gpt-</code> or <code>codex</code></td>
+</tr>
+</tbody></table></div>
+<p>Automatic selection checks the final slash-separated model-name component,
+case-insensitively. For routed endpoints it uses <code>provider_model</code>, not the
+endpoint alias. An exact override for the selected endpoint ID takes precedence
+over an override for its underlying model, followed by <code>editing_mode</code>. An <code>auto</code>
+override restores family detection for that entry. Restart the service after
+changing configuration.</p>
+<p>These defaults are compatibility heuristics, not benchmark rankings. You can
+force the same format across models for controlled comparisons. The selected
+session model determines the format for a Turn, including resumes; fallback
+providers receive the same schema and instructions within that Turn.</p>
+<p>See <a href="/s-code-docs/docs/tools-permissions#file-edits">file edits</a> for multi-file examples and the
+supported patch syntax.</p>
 <h2 id="precedence">Precedence</h2><p>Configuration precedence is defaults, an explicit configuration file, allowed
 development environment variables and explicit command overrides. Production
 profiles reject ordinary environment and command overrides. Secret values must
@@ -52,5 +99,8 @@ closed: MCP runtime capabilities are unavailable and stored, configured,
 Plugin-provided and OAuth-backed MCP servers are not connected. Deploy separate
 local daemons for actors who need MCP until the shared runtime can route every
 registry and authorization provider by full Organization, Team and Actor scope.</p>
+<h2 id="code-mode">Code Mode</h2><p>Set <code>model.code_mode = true</code> to enable optional read-only JavaScript tool
+orchestration. It is disabled by default. See <a href="/s-code-docs/docs/code-mode">Code Mode</a> for
+the available tools, limits and visible child-call history.</p>
 </article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code-docs/docs/core-concepts/"><small>Previous</small>Core concepts</a><a href="/s-code-docs/docs/model-endpoints/"><small>Next</small>Model endpoints</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
-<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#configuration-file">Configuration file</a><a href="#precedence">Precedence</a><a href="#secrets">Secrets</a><a href="#local-state">Local state</a><a href="#mcp">MCP</a></nav></aside></div></body></html>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#configuration-file">Configuration file</a><a href="#model-editing-formats">Model editing formats</a><a href="#precedence">Precedence</a><a href="#secrets">Secrets</a><a href="#local-state">Local state</a><a href="#mcp">MCP</a><a href="#code-mode">Code Mode</a></nav></aside></div></body></html>

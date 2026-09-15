@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Safety comparison and evidence · S-Code Docs</title><meta name="description" content="Compare secret-file protections in local coding agents, with primary sources and reproducible S-Code tests.">
-<link rel="canonical" href="https://sl-7qx.github.io/s-code-docs/docs/safety-comparison/"><link rel="stylesheet" href="/s-code-docs/style.css">
+<link rel="canonical" href="https://sai-foundation.github.io/s-code-docs/docs/safety-comparison/"><link rel="stylesheet" href="/s-code-docs/style.css">
 <script src="/s-code-docs/site.js" defer></script></head><body>
 <a class="skip" href="#content">Skip to content</a>
 <header><a class="brand" href="/s-code-docs/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code-docs/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
 <div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
-<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/" aria-current="page">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a><a href="/s-code-docs/docs/code-mode/">Code Mode</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/" aria-current="page">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
 <main id="content"><div class="eyebrow">Verify</div><h1>Safety comparison and evidence</h1><p class="lead">Compare secret-file protections in local coding agents, with primary sources and reproducible S-Code tests.</p>
 <article class="doc-content"><p>S-Code ships sensitive-path rules for its built-in file tools and sandboxed
 commands. The concrete benefit is that a task cannot switch from a file read
@@ -88,11 +88,11 @@ not a live attack run. No comparative pass rate is claimed for any competitor.</
 cargo test --locked -p s-code-tool-runtime \
   tests::commands_cannot_read_sensitive_workspace_files -- --exact --nocapture
 </code></pre>
-<p>The <a href="https://github.com/sl-7qx/s-code/blob/main/tests/cases/privacy-security-use-cases.jsonl">scenario manifest</a>
+<p>The <a href="https://github.com/sai-foundation/s-code/blob/main/tests/cases/privacy-security-use-cases.jsonl">scenario manifest</a>
 maps every scenario to its platform-specific behavior test. It includes
 ordinary workspace writes succeeding while external writes fail, sensitive
 file and symlink denial, browser session controls, private storage and timeout
-cleanup. The additional <a href="https://github.com/sl-7qx/s-code/blob/main/crates/tool-runtime/src/lib.rs">command-read test</a>
+cleanup. The additional <a href="https://github.com/sai-foundation/s-code/blob/main/crates/tool-runtime/src/lib.rs">command-read test</a>
 uses synthetic secrets and verifies that file contents are not returned.
 These exercise real tool/runtime enforcement, without a model call.</p>
 <p>The runner selects Seatbelt tests on macOS and Bubblewrap tests on Linux.

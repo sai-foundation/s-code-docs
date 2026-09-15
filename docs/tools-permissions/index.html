@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tools and permissions · S-Code Docs</title><meta name="description" content="Understand guarded edits, command sandboxes, permission modes and approvals.">
-<link rel="canonical" href="https://sl-7qx.github.io/s-code-docs/docs/tools-permissions/"><link rel="stylesheet" href="/s-code-docs/style.css">
+<link rel="canonical" href="https://sai-foundation.github.io/s-code-docs/docs/tools-permissions/"><link rel="stylesheet" href="/s-code-docs/style.css">
 <script src="/s-code-docs/site.js" defer></script></head><body>
 <a class="skip" href="#content">Skip to content</a>
 <header><a class="brand" href="/s-code-docs/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code-docs/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
 <div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
-<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/" aria-current="page">Tools &amp; permissions</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/" aria-current="page">Tools &amp; permissions</a><a href="/s-code-docs/docs/code-mode/">Code Mode</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
 <main id="content"><div class="eyebrow">Build with S-Code</div><h1>Tools and permissions</h1><p class="lead">Understand guarded edits, command sandboxes, permission modes and approvals.</p>
 <article class="doc-content"><h2 id="core-tools">Core tools</h2><p>The default coding profile sends a compact set of core tools for planning,
 workspace discovery, file reading, editing, commands and Git inspection.
@@ -28,12 +28,88 @@ or submodule update commands. The check runs immediately before every Git
 operation. This blocks Git-configuration command execution; it is not a claim
 that the Git process itself runs inside an OS sandbox. Automatic push is not
 exposed to the Agent in the Preview.</p>
-<h2 id="file-edits">File edits</h2><p><code>read_file</code> returns file content and a SHA-256 digest. File tools traverse from
-a stable workspace directory handle and reject symlink-swapped components. For
-an existing file, <code>apply_patch</code> requires that digest and can apply uniquely
-matching <code>old_text</code>/<code>new_text</code> blocks. The digest is an optimistic concurrency
-check, not a cross-process transaction lock: a very small check-to-rename race
-remains, so stop concurrent generators and inspect the final diff.</p>
+<h2 id="javascript-orchestration">JavaScript orchestration</h2><p>Optional <a href="/s-code-docs/docs/code-mode">Code Mode</a> batches read-only tools in JavaScript and
+shows each child call in the conversation. Editing and approvals use direct tools.</p>
+<h2 id="file-edits">File edits</h2><p><code>read_file</code> returns numbered content, a SHA-256 digest and a 16-character
+<code>revision</code>. The model uses the revision to show which file contents it edited.
+File tools traverse from a stable workspace directory handle and reject
+symlink-swapped components. Revision checking is optimistic concurrency control,
+not a cross-process transaction lock: a small check-to-rename race remains.</p>
+<p><code>apply_patch</code> supports three formats. The service selects the model-facing
+schema and corresponding system instructions using the
+<a href="/s-code-docs/docs/configuration#model-editing-formats">model editing configuration</a>.
+The legacy single-file <code>path</code> / <code>expected_revision</code> / <code>edits</code> or <code>content</code> input
+and full <code>expected_sha256</code> remain accepted for existing integrations. Unknown
+fields are now rejected instead of silently ignored, including extra keys in
+legacy single-file requests and edit objects. Remove such keys when upgrading.</p>
+<h3 id="line-edits-across-files">Line edits across files</h3><p>Each file carries its own revision. Line ranges are 1-based, inclusive and refer
+to that file's original <code>numbered_content</code>. Ranges within one file must not
+overlap. Do not include the displayed line-number prefixes in <code>new_text</code>.</p>
+<pre><code class="language-json">{
+  "files": [
+    {
+      "path": "src/a.ts",
+      "expected_revision": "0123456789abcdef",
+      "edits": [{"start_line": 10, "end_line": 12, "new_text": "return result;\n"}]
+    },
+    {
+      "path": "src/b.ts",
+      "expected_revision": "fedcba9876543210",
+      "edits": [{"start_line": 4, "end_line": 4, "new_text": "const enabled = true;\n"}]
+    }
+  ]
+}
+</code></pre>
+<p>The example revisions are placeholders: copy actual revisions from <code>read_file</code>.
+A single shared batch revision cannot describe files that were read separately.</p>
+<h3 id="exact-text-edits">Exact text edits</h3><p>Use the same <code>files</code> envelope, replacing each line edit with an exact text edit:</p>
+<pre><code class="language-json">{"old_text": "const enabled = false;", "new_text": "const enabled = true;"}
+</code></pre>
+<p>Each old block must match exactly once. Edits run in array order, so later blocks
+see earlier replacements. Ambiguous or missing matches fail; the runtime never
+silently guesses a nearby match. Do not mix text and line edits within one file.</p>
+<h3 id="patch-edits">Patch edits</h3><pre><code class="language-json">{
+  "patch": "*** Begin Patch\n*** Update File: src/a.ts\n@@\n-const enabled = false;\n+const enabled = true;\n*** Add File: note.txt\n+Enabled by default.\n*** End Patch",
+  "revisions": {"src/a.ts": "0123456789abcdef", "note.txt": null}
+}
+</code></pre>
+<p>This is an intentionally strict Add/Update subset of the patch format.
+Use bare <code>@@</code> before each update hunk and prefix lines with a space for context,
+<code>-</code> for removal or <code>+</code> for addition. Each update hunk must match complete lines
+exactly once, including trailing newlines; add unchanged context to disambiguate
+repeated lines. Hunks run sequentially. The runtime rejects fuzzy matches,
+numbered/named hunk headers, Delete/Move operations and EOF markers. For files
+without trailing newlines or with CRLF line endings, use a deliberate
+<code>files</code> / <code>content</code> replacement instead. This is not <code>git apply</code> and requires no
+Git staging, commit or repository.</p>
+<p>All formats can create or deliberately replace a whole file with <code>content</code>
+instead of <code>edits</code>. New files require <code>expected_revision: null</code>; existing files
+require their current revision.</p>
+<h3 id="multi-file-execution-and-failure-handling">Multi-file execution and failure handling</h3><p>One call accepts up to 32 unique relative paths, 100 edits per file and 16 MiB
+each of serialized request input, combined file snapshots and resulting content.
+The service validates every path, revision and edit before writing anything.
+A stale revision, protected path or invalid edit in any file rejects the batch
+without changing the others. The scheduler reserves every target in the batch.
+Preflight also rejects paths that identify the same existing file, including case aliases on typical
+macOS volumes and hard-link aliases on Unix. New sibling names that differ only
+in case must be split into separate calls, including on case-sensitive volumes.</p>
+<p>Writes then run sequentially, with a final revision check per write. This is
+not a filesystem transaction: a concurrent external change, disk or storage
+failure can stop the batch after some files were written. The error lists the
+applied paths; later paths are not attempted. A rejected version check removes
+its pending write record, so an untouched file does not block undo of other
+changes or cause an external write to be attributed to the Turn. Re-read before
+retrying. Each applied change keeps its Turn undo record, including the original content or
+new-file status. Turn undo refuses to overwrite subsequent external changes.
+If directory synchronization fails after a file has been replaced, the tool
+reports that the file was written but durability is unconfirmed. It remains a
+failed operation: inspect the file before retrying. Its applied change and Turn
+undo record are retained.</p>
+<p>Approval summaries stay compact. Both session and team approval cards offer an
+expandable list of every target, including complete long paths. The API's
+<code>target</code> string uses a JSON-encoded path array for batch edits; older single-file
+text projections remain supported. Sensitive values in paths remain redacted.
+The model's editing format never changes approval or sandbox requirements.</p>
 <h2 id="command-profiles">Command profiles</h2><div class="doc-table-wrap"><table>
 <thead>
 <tr>
@@ -81,5 +157,5 @@ the sandbox mounts only the specific content-cache directories as writable.
 Version-scoped runtime roots installed by NVM, pyenv, Conda, asdf, mise and
 Volta are mounted read-only so their standard libraries and package-manager
 files continue to work without exposing the rest of the home directory.</p>
-</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code-docs/docs/model-endpoints/"><small>Previous</small>Model endpoints</a><a href="/s-code-docs/docs/architecture/"><small>Next</small>Architecture</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
-<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#core-tools">Core tools</a><a href="#file-edits">File edits</a><a href="#command-profiles">Command profiles</a><a href="#permission-modes">Permission modes</a><a href="#dependency-caches">Dependency caches</a></nav></aside></div></body></html>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code-docs/docs/model-endpoints/"><small>Previous</small>Model endpoints</a><a href="/s-code-docs/docs/code-mode/"><small>Next</small>Code Mode</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#core-tools">Core tools</a><a href="#javascript-orchestration">JavaScript orchestration</a><a href="#file-edits">File edits</a><a href="#command-profiles">Command profiles</a><a href="#permission-modes">Permission modes</a><a href="#dependency-caches">Dependency caches</a></nav></aside></div></body></html>
