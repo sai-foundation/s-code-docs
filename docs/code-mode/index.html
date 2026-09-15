@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Mode · S-Code Docs</title><meta name="description" content="Orchestrate read-only tools with JavaScript while keeping each call visible.">
+<link rel="canonical" href="https://sai-foundation.github.io/s-code-docs/docs/code-mode/"><link rel="stylesheet" href="/s-code-docs/style.css">
+<script src="/s-code-docs/site.js" defer></script></head><body>
+<a class="skip" href="#content">Skip to content</a>
+<header><a class="brand" href="/s-code-docs/">S-Code <span>DOCS</span></a><div class="header-actions"><a href="/s-code-docs/docs/quick-start/">Get started</a><button id="theme" type="button" aria-label="Switch color theme">Theme</button></div></header>
+<div class="layout"><aside class="sidebar"><details class="navigation" open><summary>Documentation</summary>
+<label for="search">Search documentation</label><input id="search" type="search" placeholder="Search topics…" autocomplete="off"><ul id="results" aria-label="Search results" aria-live="polite" hidden></ul><nav aria-label="Documentation"><section><h2>Start here</h2><a href="/s-code-docs/docs/introduction/">Introduction</a><a href="/s-code-docs/docs/quick-start/">Quick start</a><a href="/s-code-docs/docs/core-concepts/">Core concepts</a></section><section><h2>Build with S-Code</h2><a href="/s-code-docs/docs/configuration/">Configuration</a><a href="/s-code-docs/docs/model-endpoints/">Model endpoints</a><a href="/s-code-docs/docs/tools-permissions/">Tools &amp; permissions</a><a href="/s-code-docs/docs/code-mode/" aria-current="page">Code Mode</a></section><section><h2>Operate</h2><a href="/s-code-docs/docs/architecture/">Architecture</a><a href="/s-code-docs/docs/security/">Security model</a><a href="/s-code-docs/docs/verification/">Verification</a><a href="/s-code-docs/docs/preview-release/">Preview release</a></section><section><h2>Why S-Code</h2><a href="/s-code-docs/docs/privacy-security-comparison/">Privacy and security</a></section><section><h2>Verify</h2><a href="/s-code-docs/docs/safety-comparison/">Safety comparison</a><a href="/s-code-docs/docs/efficiency-comparison/">Efficiency comparison</a></section></nav></details></aside>
+<main id="content"><div class="eyebrow">Build with S-Code</div><h1>Code Mode</h1><p class="lead">Orchestrate read-only tools with JavaScript while keeping each call visible.</p>
+<article class="doc-content"><p>Code Mode lets the model use one JavaScript program to read several files,
+search a workspace, and return only the useful parts of the results. Each tool
+still appears in the conversation, with its own status under a <strong>Code Mode</strong>
+parent. A caught tool error remains visible even when the program succeeds.</p>
+<h2 id="enable-it">Enable it</h2><p>Code Mode is optional and disabled by default. Add this to your S-Code
+configuration and restart the service:</p>
+<pre><code class="language-toml">[model]
+code_mode = true
+</code></pre>
+<p>The model receives an additional <code>execute</code> tool in coding, planning and review
+sessions. Direct tools stay available. Code Mode works with providers that can
+call ordinary JSON tools; it does not require a provider-specific code execution
+API. Whether a particular model uses it effectively still needs evaluation.</p>
+<h2 id="what-the-model-sends">What the model sends</h2><p>The <code>execute</code> arguments contain a <code>code</code> string. Its body is JavaScript inside an
+async function. For example:</p>
+<pre><code class="language-javascript">const files = await Promise.all([
+  tools.read_file({ path: "src/main.rs", max_bytes: 12000 }),
+  tools.read_file({ path: "Cargo.toml", max_bytes: 12000 }),
+]);
+text(files);
+</code></pre>
+<p>The available functions are <code>tools.read_file</code>, <code>tools.list_files</code>,
+<code>tools.search_text</code>, <code>tools.git_status</code> and <code>tools.git_diff</code>. They use the same
+argument objects and result shapes as the direct tools. <code>text(value)</code> selects
+what returns to the model; otherwise raw child results stay out of the model's
+conversation. Rejected tools reject their promises. Always await every call.</p>
+<p>Edits, commands, MCP tools and operations requiring approval use direct tool
+calls. Code Mode cannot suspend for approval. It returns a direct-call hint and
+creates no approval request. The host checks policy before hooks and again
+after hooks modify arguments; normal sensitive-path checks still apply.</p>
+<h2 id="execution-limits">Execution limits</h2><p>Each program runs in a fresh QuickJS process with a 64 MiB JavaScript heap limit,
+a 512 KiB JavaScript stack limit, a 30-second deadline, and no filesystem,
+network, environment, process, module-loader or timer bindings. Source and
+selected output are each limited to 32 KiB. Tool arguments are limited to 64 KiB
+and each result transfer to 1 MiB. At most four child tools run concurrently;
+there are at most 32 child calls per turn and four active workers per daemon.
+These heap limits do not represent a total operating-system process RSS cap.</p>
+<p>Stopping a turn cancels the program and prevents further child calls. Blocking
+host Git reads may finish under their existing timeout; their late results are
+discarded. Installed hooks continue to be trusted host code under their existing
+execution rules. A daemon restart marks interrupted programs, children and
+associated active turns cancelled. Scripts are never automatically replayed.</p>
+<h2 id="tool-visibility">Tool visibility</h2><p>The host assigns each program and child a stable tool ID. It persists the child
+before validation, hooks or execution, then publishes lifecycle events. The
+parent ID is stored with the child, so a history page containing only a child
+still identifies it as a Code Mode call. Events contain tool names and redacted
+display details, rather than file contents or the complete script output.</p>
+<p>This follows the parent/child tracing approach used in
+<a href="https://developers.openai.com/api/docs/guides/tools-programmatic-tool-calling">OpenAI programmatic tool calling</a>
+and <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling">Anthropic programmatic tool calling</a>.
+<a href="https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/code-mode.ts">OpenCode's implementation</a>
+also reports nested tool start/end activity from its host bridge. S-Code keeps
+these lifecycle records in its normal tool history so live UI and refreshed
+history share the same identities.</p>
+<p>Code Mode can reduce model round trips and returned context for batch reads.
+It is not inherently faster for a single tool, and this release does not claim
+a measured quality or token advantage across models.</p>
+</article><nav class="adjacent" aria-label="Adjacent pages"><a href="/s-code-docs/docs/tools-permissions/"><small>Previous</small>Tools &amp; permissions</a><a href="/s-code-docs/docs/architecture/"><small>Next</small>Architecture</a></nav><footer>S-Code · Apache 2.0 · Developer Preview</footer></main>
+<aside class="toc"><nav aria-label="On this page"><h2>On this page</h2><a href="#enable-it">Enable it</a><a href="#what-the-model-sends">What the model sends</a><a href="#execution-limits">Execution limits</a><a href="#tool-visibility">Tool visibility</a></nav></aside></div></body></html>
